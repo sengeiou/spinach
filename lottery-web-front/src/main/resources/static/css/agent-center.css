@@ -1,0 +1,86 @@
+@charset "UTF-8";
+
+.agent-center-navbar {
+	margin-top: 0;
+	margin-bottom: 8px;
+	padding-top: 0;
+	padding-bottom: 0;
+	background-color: #F2F2F2 !important;
+}
+
+.agent-center-navbar li {
+	padding-bottom: 0;
+	padding-top: 0;
+	min-width: 135px;
+	text-align: center;
+}
+
+.selected-agent-center-navbar-item span, .agent-center-navbar span:hover
+	{
+	border-bottom: 2px solid red;
+}
+
+.agent-center-navbar a {
+	color: #666;
+	font-size: 14px;
+}
+
+/*下级账号管理样式start*/
+.lower-level-account-manage-table .user-name {
+	color: #ec494c;
+}
+/*下级账号管理样式end*/
+
+/*代理开户样式start*/
+#agentOpenAnAccountTab {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+#agentOpenAnAccountTab .row {
+	padding-bottom: 20px;
+}
+
+#agentOpenAnAccountTab .row label {
+	float: right;
+}
+/*代理开户样式end*/
+
+/*下级开户start*/
+.lower-level-open-an-account-tip {
+	background: #fffaf7;
+	border: 1px solid #ffecdf;
+	padding: 1.5rem;
+}
+
+.lower-level-open-an-account-tip .row {
+	padding-bottom: 4px !important;
+}
+/*下级开户end*/
+
+/*团队投注明细start*/
+.betting-details-table .betting-record-order-no {
+	color: #2765a1;
+	cursor: pointer;
+}
+
+.betting-details-table .betting-record-state {
+	color: #ec494c;
+}
+/*团队投注明细end*/
+
+/*团队盈亏报表start*/
+.profit-and-loss-table .user-name {
+	color: #ec494c;
+}
+/*团队盈亏报表end*/
+
+/*团队帐变报表start*/
+#accountChangeTab input[type="date"] {
+	width: 150px;
+}
+
+#accountChangeTab input[type="text"] {
+	width: 150px;
+}
+/*团队帐变报表end*/

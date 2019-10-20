@@ -1,0 +1,13 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: lottery-admin
+  main:
+    allow-bean-definition-overriding: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

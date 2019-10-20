@@ -1,0 +1,189 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<script src="https://libs.cdnjs.net/layer/2.3/layer.js"></script>
+<style>
+@charset "UTF-8";
+
+[v-cloak] {
+	display: none;
+}
+
+.dropdown-item.active {
+	color: #fff !important;
+}
+</style>
+</head>
+<body>
+	<div id="header" v-show="showHeaderFlag" v-cloak>
+		<nav class="navbar navbar-expand-sm bg-info navbar-dark"
+			style="justify-content: space-between;">
+			<ul class="navbar-nav">
+				<template v-for="(menu, index) in menus">
+				<li class="nav-item" v-if="menu.subMenus.length == 0"
+					v-bind:class="{'active': currentPathName == menu.url}"
+					v-on:click="navTo(menu.url)"><a class="nav-link">{{menu.name}}</a></li>
+				<li class="nav-item dropdown" v-if="menu.subMenus.length > 0"
+					v-bind:class="{'active': parentMenuActive(menu.subMenus)}"><a
+					class="nav-link dropdown-toggle" data-toggle="dropdown">{{menu.name}}</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" v-for="subMenu in menu.subMenus"
+							v-bind:class="{'active': currentPathName == subMenu.url}"
+							v-on:click="navTo(subMenu.url)">{{subMenu.name}}</a>
+					</div></li>
+				</template>
+			</ul>
+			<form class="form-inline" style="float: right;">
+				<span style="padding-right: 20px;">欢迎你:{{userName}}</span>
+				<button type="button" class="btn btn-light btn-sm"
+					v-on:click="logout">退出登录</button>
+			</form>
+		</nav>
+
+	</div>
+	<script type="text/javascript">
+		var globalPrefix = 'http://localhost:8081';
+		Vue.http.headers.common['Authorization'] = localStorage.getItem('jwtToken');
+		Vue.http.interceptors.push(function(request) {
+			request.url = globalPrefix + request.url;
+			return function(response) {
+				if (response.body.code != 200) {
+					response.ok = false;
+					layer.alert(response.body.msg, {
+						title : '提示',
+						icon : 7,
+						time : 3000
+					});
+				}
+			};
+		});
+		var header = new Vue({
+			el : '#header',
+			data : {
+				showHeaderFlag : true,
+				userName : '',
+				currentPathName : '',
+				menus : [ {
+					name : '首页',
+					url : '',
+					subMenus : []
+				}, {
+					name : '总控室',
+					url : '/master-control-room',
+					subMenus : []
+				}, {
+					name : '游戏管理',
+					url : '/game-manage',
+					subMenus : []
+				}, {
+					name : '开奖情况',
+					url : '/lottery-situation',
+					subMenus : []
+				}, {
+					name : '投注记录',
+					url : '/betting-record',
+					subMenus : []
+				}, {
+					name : '追号记录',
+					url : '/tracking-number-record',
+					subMenus : []
+				}, {
+					name : '账号相关',
+					url : '',
+					subMenus : [ {
+						name : '账号管理',
+						url : '/account-manage'
+					}, {
+						name : '账变日志',
+						url : '/account-change-log'
+					}, {
+						name : '登录日志',
+						url : '/login-log'
+					} ]
+				}, {
+					name : '代理中心',
+					url : '',
+					subMenus : [ {
+						name : '返点/赔率',
+						url : '/rebate-and-odds'
+					} ]
+				}, {
+					name : '充值提现',
+					url : '',
+					subMenus : [ {
+						name : '充值订单',
+						url : '/recharge-order'
+					}, {
+						name : '提现记录',
+						url : '/withdraw-record'
+					} ]
+				}, {
+					name : '系统管理',
+					url : '',
+					subMenus : [ {
+						name : '系统公告',
+						url : '/system-notice'
+					}, {
+						name : '彩票资讯',
+						url : '/lottery-information'
+					}, {
+						name : '配置项管理',
+						url : '/config-manage'
+					}, {
+						name : '字典管理',
+						url : '/dict-manage'
+					} ]
+				} ]
+			},
+			computed : {},
+			created : function() {
+				this.currentPathName = window.location.pathname;
+				this.getUserAccountInfo();
+			},
+			methods : {
+				parentMenuActive : function(subMenus) {
+					for (var i = 0; i < subMenus.length; i++) {
+						if (subMenus[i].url == this.currentPathName) {
+							return true;
+						}
+					}
+					return false;
+				},
+
+				navTo : function(url) {
+					window.location.href = url;
+				},
+
+				/**
+				 * 获取用户账号信息
+				 */
+				getUserAccountInfo : function() {
+					var that = this;
+					that.$http.get('/userAccount/getUserAccountInfo').then(function(res) {
+						if (res.body.data == null) {
+							that.isLoggedInFlag = false;
+						} else {
+							that.userName = res.body.data.userName;
+						}
+					});
+				},
+
+				logout : function() {
+					this.$http.post('/logout').then(function(res) {
+						layer.open({
+							title : '提示',
+							icon : '1',
+							closeBtn : 0,
+							btn : [],
+							content : '退出成功!',
+							time : 2000,
+							end : function() {
+								window.location.href = '/login';
+							}
+						});
+					});
+				},
+			}
+		});
+	</script>
+</body>
+</html>

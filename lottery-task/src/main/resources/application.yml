@@ -1,0 +1,25 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/lottery?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: zohar001
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: none
+  thymeleaf:
+    cache: false
+  redis:
+    port: 6379
+    host: localhost
+  main:
+    allow-bean-definition-overriding: true
+xxl:
+  mq:
+    admin:
+      address: http://localhost:9999/xxl-mq-admin
+    accessToken: null

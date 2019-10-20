@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link href="/css/lottery-history-ssc.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div id="lottery-history-ssc" v-cloak>
+		<div class="row ssc-lottery-history-header">
+			<div class="col-sm-3 ssc-lottery-history-title">{{gameName}}</div>
+			<div class="col-sm-5">
+				<a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': showStatisticalDoubleSidedFlag}" v-on:click="toggleStatisticalDoubleSided">今日双面/号码统计</a><a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': showStatisticalLoongFlag}" v-on:click="showStatisticalLoongFlag = !showStatisticalLoongFlag">长龙提醒</a> <a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': showStatisticalNumFlag}" v-on:click="showStatisticalNumFlag = !showStatisticalNumFlag">号码分布</a>
+			</div>
+			<div class="col-sm-2 offset-md-2 ssc-lottery-history-date">
+				<input class="form-control-sm" type="date" v-model="lotteryDate" v-on:change="loadLotteryHistory">
+			</div>
+		</div>
+		<transition name="fade">
+		<div class="ssc-statistical-double-sided" v-show="showStatisticalDoubleSidedFlag">
+			<div style="padding-bottom: 10px;">今日双面统计</div>
+			<table class="table table-bordered ssc-statistical-double-sided-table">
+				<thead>
+					<tr>
+						<th>号码</th>
+						<th v-for="(numberOfTime, index) in numAppearNumberOfTime">{{index}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>出现次数</td>
+						<td v-for="numberOfTime in numAppearNumberOfTime">{{numberOfTime}}</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<table class="table table-bordered ssc-statistical-double-sided-table">
+				<thead>
+					<tr>
+						<th rowspan="2">球次</th>
+						<th colspan="4">第一球</th>
+						<th colspan="4">第二球</th>
+						<th colspan="4">第三球</th>
+						<th colspan="4">第四球</th>
+						<th colspan="4">第五球</th>
+						<th colspan="4">总和</th>
+					</tr>
+					<tr>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+						<th>单</th>
+						<th>双</th>
+						<th>大</th>
+						<th>小</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style="font-size: 13px;">出现次数</td>
+						<td v-for="numberOfTime in ballNumberOfTime">{{numberOfTime}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		</transition>
+		<transition name="fade">
+		<div class="ssc-statistical-loong" v-show="showStatisticalLoongFlag">
+			<div style="padding-bottom: 10px;">长龙连开提醒</div>
+			<div class="row">
+				<div class="col-sm-2" v-for="loong in loongs">
+					<div>
+						<span>{{loong.positionName}}:</span> <span>{{loong.loongType}}</span> <span>{{loong.count}}</span> <span>期</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		</transition>
+		<transition name="fade">
+		<div class="ssc-statistical-num" v-show="showStatisticalNumFlag">
+			<div class="row">
+				<div class="col-sm-10 offset-sm-1">
+					<label>球号筛选:</label><span> <a type="button" class="btn btn-sm btn-outline-danger" v-for="num in nums" v-bind:class="{'active': num.selectedFlag}" v-on:click="selectedNum(num)">号码{{num.num}}</a>
+					</span>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-10 offset-sm-1">
+					<label>大小单双:</label><span> <a type="button" class="btn btn-sm btn-outline-danger" v-bind:class="{'active' : selectedBigFlag}" v-on:click="selectedBig">大</a> <a type="button" class="btn btn-sm btn-outline-danger" v-bind:class="{'active' : selectedSmallFlag}" v-on:click="selectedSmall">小</a> <a type="button" class="btn btn-sm btn-outline-danger" v-bind:class="{'active' : selectedSingleFlag}" v-on:click="selectedSingle">单</a> <a type="button" class="btn btn-sm btn-outline-danger" v-bind:class="{'active' : selectedDoubleFlag}" v-on:click="selectedDouble">双</a> <a type="button" class="btn btn-sm btn-outline-danger" v-bind:class="{'active' : selectedTwinNumberFlag}" v-on:click="selectedTwinNumber">对子号</a>
+					</span>
+				</div>
+			</div>
+		</div>
+		</transition>
+		<table class="table table-bordered ssc-lottery-history-table">
+			<thead>
+				<tr>
+					<th>时间</th>
+					<th>期号</th>
+					<th style="padding: 0.45rem;"><a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': displayMode == 'number'}" v-on:click="displayMode = 'number'">显示号码</a> <a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': displayMode == 'bigSmall'}" v-on:click="displayMode = 'bigSmall'">显示大小</a> <a type="button" class="btn btn-sm btn-outline-secondary" v-bind:class="{'active': displayMode == 'singleDouble'}" v-on:click="displayMode = 'singleDouble'">显示单双</a></th>
+					<th colspan="3">总和</th>
+					<th>1-5龙虎</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="issue in issues">
+					<td>{{issue.lotteryTime}}</td>
+					<td>{{issue.issueNum}}</td>
+					<td style="padding: 8px;">
+						<div class="ssc-game-lottery-result">
+							<div class="ssc-game-lottery-content" v-show="issue.lotteryNum != null && issue.lotteryNum != ''">
+								<span v-for="(num, index) in splitLotteryNum(issue)" v-bind:class="getNumClass(issue.issueNum, index, num)">{{num}}</span>
+							</div>
+							<div style="padding-top: 4px;" v-show="issue.lotteryNum == null || issue.lotteryNum == ''">
+								<div class="text-center text-secondary">
+									<strong>正在获取开奖结果...</strong>
+									<div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>{{issue.extField.sumLotteryNum}}</td>
+					<td v-bind:class="issue.extField.sumSingleDouble == '双' ? 'ssc-highlight-red' : 'ssc-highlight-blue'">{{issue.extField.sumSingleDouble}}</td>
+					<td v-bind:class="issue.extField.sumBigSmall == '大' ? 'ssc-highlight-red' : 'ssc-highlight-blue'">{{issue.extField.sumBigSmall}}</td>
+					<td v-bind:class="issue.extField.loongTiger == '龙' ? 'ssc-highlight-red' : 'ssc-highlight-blue'">{{issue.extField.loongTiger}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script src="/js/lottery-history-ssc.js"></script>
+</body>
+</html>

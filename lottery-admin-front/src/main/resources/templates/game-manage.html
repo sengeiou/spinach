@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<title>游戏管理</title>
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-migrate/1.1.1/jquery-migrate.min.js"></script>
+<script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+<script src="https://cdn.bootcss.com/dayjs/1.7.8/dayjs.min.js"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/bootstrap-table.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/bootstrap-table.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/locale/bootstrap-table-zh-CN.min.js"></script>
+<script src="https://cdn.bootcss.com/zTree.v3/3.5.40/js/jquery.ztree.all.min.js"></script>
+<link href="https://cdn.bootcss.com/zTree.v3/3.5.40/css/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+
+<link href="/css/common/common.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+.hot-game-logo {
+	position: absolute;
+}
+
+.issue-setting-modal-dialog {
+	max-width: 100%;
+	width: 45%;
+}
+
+.add-or-update-game-dialog {
+	max-width: 100%;
+	width: 45%;
+}
+
+.add-or-update-game-play-dialog {
+	max-width: 100%;
+	width: 70%;
+}
+
+.add-or-update-game-play-dialog .modal-body {
+	height: 450px;
+	overflow: auto;
+}
+
+.game-play-summary-title {
+	margin-bottom: 20px;
+	padding-left: 10px;
+	border-left: 3px solid #3080fe;
+}
+
+.game-play-details-item label {
+	color: #9a9898;
+	padding-right: 4px;
+}
+
+.game-play-details-highlight {
+	color: #E37D23 !important;
+}
+
+.optional-num-label {
+	margin-bottom: 0;
+}
+
+.game-category-nav {
+	display: inline-flex;
+	height: 47px;
+	line-height: 29px;
+}
+
+.game-category-nav .nav-item {
+	min-width: 105px;
+	text-align: center;
+}
+
+.game-category-nav a {
+	color: #666;
+}
+
+.selected-game-category-nav-item {
+	border-bottom: 2px solid #5584ff;
+}
+
+.selected-game-category-nav-item a {
+	color: #007bff;
+}
+</style>
+</head>
+
+<body>
+	<div th:replace="common/header::html"></div>
+	<div id="game-manage" v-cloak>
+		<div v-show="showGameManageFlag">
+			<ul class="nav game-category-nav">
+				<li class="nav-item" v-bind:class="{'selected-game-category-nav-item': '' == tabWithGameCategoryId}" v-on:click="switchGameCateogry('')"><a class="nav-link">全部</a></li>
+				<li class="nav-item" v-for="gameCategoryDict in gameCategoryDicts" v-bind:class="{'selected-game-category-nav-item': gameCategoryDict.id == tabWithGameCategoryId}" v-on:click="switchGameCateogry(gameCategoryDict.id)"><a class="nav-link">{{gameCategoryDict.gameCategoryName}}</a></li>
+			</ul>
+			<form class="form-inline common-query-cond-form float-right">
+				<button type="button" class="btn btn-secondary btn-sm" style="margin-right: 4px;" v-on:click="toGameCategoryPage">游戏类别维护</button>
+				<button type="button" class="btn btn-info btn-sm" style="margin-right: 4px;" v-on:click="openAddGameModal">新增游戏</button>
+				<button type="button" class="btn btn-primary btn-sm" v-on:click="openDictSyncModal">字典同步</button>
+			</form>
+			<table class="table table-hover common-table">
+				<thead>
+					<tr>
+						<th>游戏类别</th>
+						<th>游戏名称</th>
+						<th>游戏代码</th>
+						<th>游戏状态</th>
+						<th>排序号</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="game in games">
+						<td>{{game.gameCategoryName}}</td>
+						<td><span>{{game.gameName}}</span><img class="hot-game-logo" src="/images/hot-game.png" v-show="game.hotGameFlag" /></td>
+						<td>{{game.gameCode}}</td>
+						<td>{{game.stateName}}</td>
+						<td>{{game.orderNo}}</td>
+						<td>
+							<button type="button" class="btn btn-outline-primary btn-sm" v-on:click="toGamePlaySetting(game)">玩法设置</button>
+							<button type="button" class="btn btn-outline-secondary btn-sm" v-on:click="openIssueSettingModal(game)">期号规则</button>
+							<button type="button" class="btn btn-outline-success btn-sm" v-on:click="openEditGameModal(game)">编辑</button>
+							<button type="button" class="btn btn-outline-danger btn-sm" v-on:click="delGame(game)">删除</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<!-- 游戏类别维护页面start -->
+		<div v-show="showGameCategoryFlag">
+			<form class="form-inline common-query-cond-form float-right">
+				<button type="button" class="btn btn-info btn-sm" style="margin-right: 4px;" v-on:click="openAddGameCategoryModal">新增游戏类别</button>
+				<button type="button" class="btn btn-sm" v-on:click="backToGameManageWithGameCategory">返回</button>
+			</form>
+			<table class="table table-hover common-table">
+				<thead>
+					<tr>
+						<th>游戏类别</th>
+						<th>游戏类别代码</th>
+						<th>排序号</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="gameCategory in gameCategorys">
+						<td>{{gameCategory.gameCategoryName}}</td>
+						<td>{{gameCategory.gameCategoryCode}}</td>
+						<td>{{gameCategory.orderNo}}</td>
+						<td>
+							<button type="button" class="btn btn-outline-success btn-sm" v-on:click="openEditGameCategoryModal(gameCategory)">编辑</button>
+							<button type="button" class="btn btn-outline-danger btn-sm" v-on:click="delGameCategory(gameCategory)">删除</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<!-- 游戏类别维护页面end -->
+
+		<div v-show="showGamePlayFlag">
+			<div style="padding-left: 14px; padding-top: 10px; padding-bottom: 14px; padding-right: 10px;">
+				<span>{{selectedGame.gameName}}</span> <span style="float: right;">
+					<button type="button" class="btn btn-info btn-sm" v-on:click="openAddGamePlayModal">新增玩法</button>
+					<button type="button" class="btn btn-sm" v-on:click="backToGameManageWithGamePlay">返回</button>
+				</span>
+			</div>
+			<div class="row" style="margin-left: 0; margin-right: 0;">
+				<div class="col-sm-3" style="padding-left: 0; padding-right: 0;">
+					<div class="card" style="height: 550px;">
+						<div class="card-header">全部玩法</div>
+						<div class="card-body" style="overflow: auto;">
+							<ul id="gamePlayTree" class="ztree"></ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-9" style="padding-left: 0; padding-right: 0;">
+					<div class="card">
+						<div class="card-header">玩法详情</div>
+						<div class="card-body">
+							<div class="game-play-summary-title" style="">玩法摘要</div>
+							<div class="row">
+								<div class="col-sm-6 game-play-details-item">
+									<label>玩法名称:</label> <span>{{selectedGamePlay.gamePlayName}}</span>
+								</div>
+								<div class="col-sm-6 game-play-details-item">
+									<label>玩法代码:</label> <span>{{selectedGamePlay.gamePlayCode}}</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 game-play-details-item">
+									<label>玩法类别:</label> <span>{{selectedGamePlay.gamePlayCategoryName}}</span>
+								</div>
+								<div class="col-sm-6 game-play-details-item">
+									<label>子玩法类别:</label> <span>{{selectedGamePlay.subGamePlayCategoryName}}</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 game-play-details-item">
+									<label>赔率:</label> <span>{{selectedGamePlay.oddsMode == '1' ? selectedGamePlay.odds : '不固定赔率'}}</span>
+								</div>
+								<div class="col-sm-6 game-play-details-item">
+									<label>状态:</label> <span class="game-play-details-highlight">{{selectedGamePlay.stateName}}</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 game-play-details-item">
+									<label>排序号:</label> <span>{{selectedGamePlay.orderNo}}</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-12 game-play-details-item">
+									<label>玩法说明:</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="game-play-details-highlight" style="margin-left: 70px;" v-html="selectedGamePlay.gamePlayDesc"></div>
+								</div>
+							</div>
+							<div class="game-play-summary-title" style="margin-top: 20px;">号位明细</div>
+							<table class="table table-sm common-table">
+								<thead>
+									<tr>
+										<th>号位</th>
+										<th>可选号码</th>
+										<th>最大可选数量</th>
+										<th>快捷按钮</th>
+									</tr>
+								</thead>
+								<tbody>
+									<template v-for="numLocate in selectedGamePlay.numLocates">
+									<tr>
+										<td>{{numLocate.numLocateName}}</td>
+										<td>{{numLocate.nums}}</td>
+										<td>{{numLocate.maxSelected}}</td>
+										<td>{{numLocate.hasFilterBtnFlag ? '显示': '不显示'}}</td>
+									</tr>
+									<tr v-for="optionalNum in numLocate.optionalNums" v-if="selectedGamePlay.oddsMode != '1'">
+										<td colspan="4">
+											<div class="row">
+												<div class="offset-md-2 col-sm-4">
+													<label class="optional-num-label">号码:</label> <span>{{optionalNum.num}}</span>
+												</div>
+												<div class="col-sm-4">
+													<label class="optional-num-label">赔率:</label> <span>{{optionalNum.odds}}</span>
+												</div>
+											</div>
+										</td>
+									</tr>
+									</template>
+								</tbody>
+							</table>
+							<div style="text-align: center;" v-show="selectedGamePlay.id != null">
+								<button type="button" class="btn btn-info btn-sm" v-on:click="updateGamePlayState">{{selectedGamePlay.state == '1' ? '禁用' : '启用'}}</button>
+								<button type="button" class="btn btn-success btn-sm" v-on:click="openEditGamePlayModal">编辑</button>
+								<button type="button" class="btn btn-danger btn-sm" v-on:click="delGamePlay">删除</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="addOrUpdateGameCategoryFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">{{gameCategoryActionTitle}}</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="addOrUpdateGameCategoryFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<form>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>游戏类别:</label> <input type="text" class="form-control" v-model="editGameCategory.gameCategoryName">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>游戏类别code:</label> <input type="text" class="form-control" v-model="editGameCategory.gameCategoryCode">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>排序号:</label> <input type="number" class="form-control" v-model="editGameCategory.orderNo">
+										</div>
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="addOrUpdateGameCategory">保存</button>
+								<button type="button" class="btn btn-sm" v-on:click="addOrUpdateGameCategoryFlag = false">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="issueSettingFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog issue-setting-modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">期号设置</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="issueSettingFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<form>
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">期号显示格式</span>
+										</div>
+										<input type="text" class="form-control" placeholder="年月日" v-model="issueSettingDetails.dateFormat"> <input type="text" class="form-control" placeholder="期号" v-model="issueSettingDetails.issueFormat">
+									</div>
+									<div class="" style="margin-top: 20px; margin-bottom: 20px; padding-left: 10px; border-left: 3px solid #3080fe;">
+										<span>期号规则</span>
+										<button type="button" class="btn btn-info btn-sm float-right" v-on:click="addIssueGenerateRule">增加规则</button>
+									</div>
+									<table class="table table-sm common-table">
+										<thead>
+											<tr>
+												<th>开始时间</th>
+												<th>时间间隔(分钟)</th>
+												<th>期数</th>
+												<th>操作</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(issueGenerateRule, index) in issueSettingDetails.issueGenerateRules">
+												<td><input type="time" class="form-control-sm" v-model="issueGenerateRule.startTime"></td>
+												<td><input type="text" class="form-control-sm" v-model="issueGenerateRule.timeInterval"></td>
+												<td><input type="text" class="form-control-sm" v-model="issueGenerateRule.issueCount"></td>
+												<td>
+													<button type="button" class="btn btn-danger btn-sm" v-on:click="delIssueGenerateRule(index)">删除</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="addOrUpdateIssueSetting">保存</button>
+								<button type="button" class="btn btn-sm" v-on:click="issueSettingFlag = false">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="addOrUpdateGameFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog add-or-update-game-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">{{gameActionTitle}}</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="addOrUpdateGameFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<form>
+									<div class="form-group row">
+										<div class="col-sm-4">
+											<label>游戏类别:</label> <select class="form-control" v-model="editGame.gameCategoryId">
+												<option value="">请选择</option>
+												<option v-for="gameCategoryDict in gameCategoryDicts" :value="gameCategoryDict.id">{{gameCategoryDict.gameCategoryName}}</option>
+											</select>
+										</div>
+										<div class="col-sm-4">
+											<label>游戏名称:</label> <input type="text" class="form-control" v-model="editGame.gameName">
+										</div>
+										<div class="col-sm-4">
+											<label>游戏代码:</label> <input type="text" class="form-control" v-model="editGame.gameCode">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label><span>游戏说明:</span>
+												<div class="custom-control custom-checkbox custom-control-inline">
+													<input type="checkbox" id="hotGameFlag" class="custom-control-input" v-model="editGame.hotGameFlag"> <label for="hotGameFlag" class="custom-control-label">热门游戏</label>
+												</div></label>
+											<textarea class="form-control" rows="3" v-model="editGame.gameDesc"></textarea>
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label>状态:</label>
+											<div>
+												<div class="custom-control custom-radio custom-control-inline">
+													<input type="radio" class="custom-control-input" id="editGameState1" v-model="editGame.state" value="1"> <label class="custom-control-label" for="editGameState1">启用</label>
+												</div>
+												<div class="custom-control custom-radio custom-control-inline">
+													<input type="radio" class="custom-control-input" id="editGameState2" v-model="editGame.state" value="2"> <label class="custom-control-label" for="editGameState2">禁用</label>
+												</div>
+												<div class="custom-control custom-radio custom-control-inline">
+													<input type="radio" class="custom-control-input" id="editGameState3" v-model="editGame.state" value="3"> <label class="custom-control-label" for="editGameState3">维护中</label>
+												</div>
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<label>排序号:</label> <input type="text" class="form-control" v-model="editGame.orderNo">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>复制已有游戏的玩法</label> <select class="form-control" v-model="editGame.copyGameCode">
+												<option value="">--请选择要复制的游戏--</option>
+												<option v-for="game in games" v-if="game.id != editGame.id" v-bind:value="game.gameCode">{{game.gameName}}</option>
+											</select>
+										</div>
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="addOrUpdateGame">保存</button>
+								<button type="button" class="btn btn-sm" v-on:click="addOrUpdateGameFlag = false">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="dictSyncFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog dict-sync-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">字典同步</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="dictSyncFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<form>
+									<div class="row">
+										<div class="col-sm-9 offset-md-3">
+											<div class="custom-control custom-checkbox mb-3 custom-control-inline">
+												<input id="syncGameDict" class="custom-control-input" type="checkbox" v-model="syncGameDict"> <label for="syncGameDict" class="custom-control-label">游戏</label>
+											</div>
+											<div class="custom-control custom-checkbox mb-3 custom-control-inline">
+												<input id="syncGamePlayDict" class="custom-control-input" type="checkbox" v-model="syncGamePlayDict"> <label for="syncGamePlayDict" class="custom-control-label">游戏玩法</label>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-sm-9 offset-md-3">
+											<label style="color: red;">*</label><span>勾选要同步的字典数据</span>
+										</div>
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="dictSync">同步</button>
+								<button type="button" class="btn btn-sm" v-on:click="dictSyncFlag = false">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="addOrUpdateGamePlayFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog add-or-update-game-play-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">{{gamePlayActionTitle}}</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="addOrUpdateGamePlayFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="game-play-summary-title" style="">玩法摘要</div>
+								<form>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label>玩法名称:</label> <input type="text" class="form-control" v-model="editGamePlay.gamePlayName">
+										</div>
+										<div class="col-sm-6">
+											<label>玩法代码:</label> <input type="text" class="form-control" v-model="editGamePlay.gamePlayCode">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label>玩法类别:</label> <input type="text" class="form-control" v-model="editGamePlay.gamePlayCategoryName">
+										</div>
+										<div class="col-sm-6">
+											<label>子玩法类别:</label> <input type="text" class="form-control" v-model="editGamePlay.subGamePlayCategoryName">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label>赔率:</label>
+											<div class="input-group">
+												<div class="input-group-prepend">
+													<select class="form-control" v-model="editGamePlay.oddsMode">
+														<option value="1">固定赔率</option>
+														<option value="2">不固定赔率</option>
+													</select>
+												</div>
+												<input type="text" class="form-control" v-model="editGamePlay.odds">
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<label>状态:</label>
+											<div>
+												<div class="custom-control custom-radio custom-control-inline">
+													<input type="radio" class="custom-control-input" id="editGamePlayState1" v-model="editGamePlay.state" value="1"> <label class="custom-control-label" for="editGamePlayState1">启用</label>
+												</div>
+												<div class="custom-control custom-radio custom-control-inline">
+													<input type="radio" class="custom-control-input" id="editGamePlayState0" v-model="editGamePlay.state" value="0"> <label class="custom-control-label" for="editGamePlayState0">禁用</label>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>排序号:</label> <input type="text" class="form-control" v-model="editGamePlay.orderNo">
+										</div>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label>玩法说明:</label>
+											<textarea class="form-control" rows="4" v-model="editGamePlay.gamePlayDesc"></textarea>
+										</div>
+									</div>
+								</form>
+								<div class="game-play-summary-title" style="margin-top: 20px;">
+									<span>号位明细</span>
+									<button type="button" class="btn btn-info btn-sm float-right" v-on:click="addNumLocate">增加号位</button>
+								</div>
+								<table class="table table-sm common-table">
+									<thead>
+										<tr>
+											<th>号位</th>
+											<th>可选号码</th>
+											<th>最大可选数量</th>
+											<th>快捷按钮</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<template v-for="(numLocate, index) in editGamePlay.numLocates">
+										<tr>
+											<td><input type="text" class="form-control-sm" v-model="numLocate.numLocateName"></td>
+											<td>
+												<div class="input-group">
+													<input type="text" class="form-control-sm" v-model="numLocate.nums">
+													<div class="input-group-append">
+														<button type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown"></button>
+														<div class="dropdown-menu">
+															<a class="dropdown-item" href="javascript:;" v-on:click="generateNumAndShowNumDetails(numLocate)">生成号码</a><a class="dropdown-item" href="javascript:;" v-on:click="showNumDetails(numLocate)">{{!numLocate.showDetails ? '号码明细' : '隐藏明细'}}</a>
+														</div>
+													</div>
+												</div>
+											</td>
+											<td><input type="text" class="form-control-sm" v-model="numLocate.maxSelected"></td>
+											<td><select class="form-control-sm" v-model="numLocate.hasFilterBtnFlag">
+													<option value="true">显示</option>
+													<option value="false">不显示</option>
+											</select></td>
+											<td>
+												<button type="button" class="btn btn-danger btn-sm" v-on:click="delNumLocate(index)">删除</button>
+											</td>
+										</tr>
+										<tr v-for="optionalNum in numLocate.optionalNums" v-show="numLocate.showDetails">
+											<td colspan="5">
+												<div class="row">
+													<div class="offset-md-2 col-sm-4">
+														<label class="optional-num-label">号码:</label> <span><input type="text" class="form-control-sm" v-model="optionalNum.num" disabled="disabled"></span>
+													</div>
+													<div class="col-sm-4">
+														<label class="optional-num-label">赔率:</label> <span><input type="text" class="form-control-sm" v-model="optionalNum.odds"></span>
+													</div>
+												</div>
+											</td>
+										</tr>
+										</template>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="addOrUpdateGamePlay">保存</button>
+								<button type="button" class="btn btn-sm" v-on:click="addOrUpdateGamePlayFlag = false">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/js/game-manage.js"></script>
+</body>
+</html>

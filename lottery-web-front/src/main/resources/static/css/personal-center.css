@@ -1,0 +1,120 @@
+@charset "UTF-8";
+
+.personal-center-navbar {
+	margin-top: 0;
+	margin-bottom: 8px;
+	padding-top: 0;
+	padding-bottom: 0;
+	background-color: #F2F2F2 !important;
+}
+
+.personal-center-navbar li {
+	padding-bottom: 0;
+	padding-top: 0;
+	min-width: 150px;
+	text-align: center;
+}
+
+.selected-personal-center-navbar-item span, .personal-center-navbar span:hover
+	{
+	border-bottom: 2px solid red;
+}
+
+.personal-center-navbar a {
+	color: #666;
+	font-size: 14px;
+}
+
+/*邀请码管理样式start*/
+#inviteCodeTab {
+	padding-top: 20px;
+}
+
+.none-invite-code {
+	padding-top: 30px;
+}
+
+.none-invite-code .row {
+	padding-bottom: 20px;
+}
+
+.invite-code-info {
+	padding-top: 30px;
+}
+
+.invite-code-info .row {
+	padding-bottom: 20px;
+}
+
+.invite-code-info-item label {
+	padding-right: 20px;
+	min-width: 30%;
+	text-align: end;
+	color: #9a9898;
+	font-size: 28px;
+}
+
+.invite-code-info-item span {
+	font-size: 28px;
+}
+
+.edit-bank-info-form button {
+	margin-right: 20px;
+}
+
+/*邀请码管理样式end*/
+
+/*银行卡资料管理样式start*/
+#bankCardInfoTab {
+	padding-top: 20px;
+}
+
+.none-bank-card-info {
+	padding-top: 30px;
+}
+
+.none-bank-card-info .row {
+	padding-bottom: 20px;
+}
+
+.bank-card-info {
+	padding-top: 30px;
+}
+
+.bank-card-info .row {
+	padding-bottom: 20px;
+}
+
+.bank-card-info-item label {
+	padding-right: 20px;
+	min-width: 30%;
+	text-align: end;
+	color: #9a9898;
+}
+
+.bank-card-info-item span {
+	
+}
+
+.edit-bank-info-form button {
+	margin-right: 20px;
+}
+
+/*银行卡资料管理end*/
+
+/*登录密码修改样式start*/
+#loginPwdModifyTab {
+	padding-top: 20px;
+}
+/*登录密码修改end*/
+
+/*资金密码修改样式start*/
+#moneyPwdModifyTab {
+	padding-top: 20px;
+}
+/*资金密码修改end*/
+
+/*个人账变样式start*/
+/*个人账变样式end*/
+/*个人充提样式start*/
+/*个人充提样式end*/

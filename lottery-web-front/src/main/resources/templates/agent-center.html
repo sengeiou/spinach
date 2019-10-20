@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<title>代理中心</title>
+<link
+	href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css"
+	rel="stylesheet">
+<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+<script
+	src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+<script
+	src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+<script src="https://cdn.staticfile.org/dayjs/1.7.8/dayjs.min.js"></script>
+<link
+	href="https://cdn.staticfile.org/bootstrap-table/1.13.1/bootstrap-table.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.staticfile.org/bootstrap-table/1.13.1/bootstrap-table.min.js"></script>
+<script
+	src="https://cdn.staticfile.org/bootstrap-table/1.13.1/locale/bootstrap-table-zh-CN.min.js"></script>
+<script
+	src="https://cdn.staticfile.org/clipboard.js/2.0.4/clipboard.min.js"></script>
+<link href="/css/common/common.css" rel="stylesheet" type="text/css">
+<link href="/css/agent-center.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+	<div class="container">
+		<div th:replace="common/header::html"></div>
+		<div th:replace="common/personal-navbar::html"></div>
+		<div id="agent-center" v-cloak>
+			<div class="row">
+				<div class="col-sm-12">
+					<nav class="navbar navbar-expand-sm bg-light agent-center-navbar">
+						<ul class="navbar-nav">
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'lowerLevelAccountManage'}"
+								v-on:click="switchLowerLevelAccountManageTab"><a
+								class="nav-link"><span>下级账号管理</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'agentOpenAnAccount'}"
+								v-on:click="switchAgentOpenAnAccountTab"><a
+								class="nav-link"><span>代理开户</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'lowerLevelOpenAnAccount'}"
+								v-on:click="switchLowerLevelOpenAnAccountTab"><a
+								class="nav-link"><span>下级开户</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'bettingDetails'}"
+								v-on:click="switchBettingDetailsTab"><a class="nav-link"><span>团队投注明细</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'rechargeDetails'}"
+								v-on:click="switchRechargeDetailsTab"><a class="nav-link"><span>团队充值明细</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'withdrawDetails'}"
+								v-on:click="switchWithdrawDetailsTab"><a class="nav-link"><span>团队提现明细</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'profitAndLoss'}"
+								v-on:click="switchProfitAndLossTab"><a class="nav-link"><span>团队盈亏报表</span></a></li>
+							<li class="nav-item"
+								v-bind:class="{'selected-agent-center-navbar-item': currentTab == 'accountChange'}"
+								v-on:click="switchAccountChangeTab"><a class="nav-link"><span>团队帐变报表</span></a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+
+			<div id="lowerLevelAccountManageTab"
+				v-show="currentTab == 'lowerLevelAccountManage'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameLowerLevelAccountManage">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>范围:</label> <select class="form-control-sm"
+							v-model="queryScopeLowerLevelAccountManage">
+							<option v-for="dictItem in queryScopeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshLowerLevelAccountManageTable">搜索</button>
+				</form>
+				<table class="common-table lower-level-account-manage-table"></table>
+			</div>
+
+			<div id="agentOpenAnAccountTab"
+				v-show="currentTab == 'agentOpenAnAccount'">
+				<div class="col-sm-6 offset-sm-3">
+					<div class="row">
+						<div class="col-sm-3">
+							<label>用户名</label>
+						</div>
+						<div class="col-sm-9">
+							<input type="text" class="form-control"
+								v-model="userNameAgentOpenAnAccount">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<label>登录密码</label>
+						</div>
+						<div class="col-sm-9">
+							<input type="password" class="form-control"
+								v-model="loginPwdAgentOpenAnAccount">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<label>确认登录密码</label>
+						</div>
+						<div class="col-sm-9">
+							<input type="password" class="form-control"
+								v-model="confirmLoginPwdAgentOpenAnAccount">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<label>返点/赔率</label>
+						</div>
+						<div class="col-sm-9">
+							<select class="form-control"
+								v-model="rebateAndOddsAgentOpenAnAccount">
+								<option value="">请选择</option>
+								<option v-for="rebateAndOdds in rebateAndOddses"
+									:value="rebateAndOdds">{{rebateAndOdds.rebate}}%/{{rebateAndOdds.odds}}</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6 offset-sm-5">
+							<button type="button" class="btn btn-danger"
+								v-on:click="agentOpenAnAccount">确认开户</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="agentOpenAnAccountTab"
+				v-show="currentTab == 'lowerLevelOpenAnAccount'">
+				<div class="col-sm-9 offset-sm-2">
+					<div class="row">
+						<div class="col-sm-3">
+							<label>开户类型</label>
+						</div>
+						<div class="col-sm-6">
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" class="custom-control-input"
+									id="accountTypeMember" value="member"
+									v-model="accountTypeLowerLevelOpenAnAccount"> <label
+									class="custom-control-label" for="accountTypeMember">会员</label>
+							</div>
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" class="custom-control-input"
+									id="accountTypeAgent" value="agent"
+									v-model="accountTypeLowerLevelOpenAnAccount"> <label
+									class="custom-control-label" for="accountTypeAgent">代理</label>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<label>返点/赔率</label>
+						</div>
+						<div class="col-sm-6">
+							<select class="form-control"
+								v-model="rebateAndOddsLowerLevelOpenAnAccount">
+								<option value="">请选择</option>
+								<option v-for="rebateAndOdds in rebateAndOddses"
+									:value="rebateAndOdds">{{rebateAndOdds.rebate}}%/{{rebateAndOdds.odds}}</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6 offset-sm-3">
+							<button type="button" class="btn btn-danger"
+								v-on:click="generateRegiterLink">生成链接</button>
+						</div>
+					</div>
+					<div class="row" v-show="inviteRegisterLink != null">
+						<div class="col-sm-3">
+							<label>邀请注册链接</label>
+						</div>
+						<div class="col-sm-6">
+							<span>{{inviteRegisterLink}}</span>
+							<button id="copyInviteRegisterLinkBtn" type="button"
+								class="btn btn-sm" :data-clipboard-text="inviteRegisterLink">复制</button>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-body lower-level-open-an-account-tip">
+							<div class="row">※ 温馨提示：</div>
+							<div class="row">1、不同的返点赔率不同，返点越高赔率越高。</div>
+							<div class="row">2、代理可获得的佣金等于代理自身返点与下级返点的差值，如自身返点5%，下级返点3%，您将能获得下级投注返点：5%-3%=2%，如下级投注100元，您将会获得2元。</div>
+							<div class="row">3、下级返点值设得越低，下级的赔率就越低，建议给下级设置的返点不要过低。</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="bettingDetailsTab" v-show="currentTab == 'bettingDetails'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>时间:</label><input type="date" class="form-control-sm"
+							v-model="startTimeBettingDetails"><span>到</span><input
+							type="date" class="form-control-sm"
+							v-model="endTimeBettingDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameBettingDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>查询范围:</label> <select class="form-control-sm"
+							v-model="accountTypeBettingDetails">
+							<option value="">全部</option>
+							<option v-for="dictItem in accountTypeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+				</form>
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>游戏:</label> <select class="form-control-sm"
+							v-model="gameCodeBettingDetails">
+							<option value="">全部游戏</option>
+							<option v-for="dictItem in gameDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<div class="form-group common-query-cond">
+						<label>期号:</label><input type="text" class="form-control-sm"
+							v-model="issueNumBettingDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>状态:</label> <select class="form-control-sm"
+							v-model="stateBettingDetails">
+							<option value="">全部</option>
+							<option v-for="dictItem in bettingOrderStateDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshBettingDetailsTable">搜索</button>
+				</form>
+				<table class="common-table betting-details-table"></table>
+			</div>
+
+			<div id="rechargeDetailsTab" v-show="currentTab == 'rechargeDetails'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>时间:</label><input type="date" class="form-control-sm"
+							v-model="startTimeRechargeDetails"><span>到</span><input
+							type="date" class="form-control-sm"
+							v-model="endTimeRechargeDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameRechargeDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>查询范围:</label> <select class="form-control-sm"
+							v-model="accountTypeRechargeDetails">
+							<option value="">全部</option>
+							<option v-for="dictItem in accountTypeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshRechargeDetailsTable">搜索</button>
+				</form>
+				<table class="common-table recharge-details-table"></table>
+			</div>
+
+			<div id="withdrawDetailsTab" v-show="currentTab == 'withdrawDetails'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>时间:</label><input type="date" class="form-control-sm"
+							v-model="startTimeWithdrawDetails"><span>到</span><input
+							type="date" class="form-control-sm"
+							v-model="endTimeWithdrawDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameWithdrawDetails">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>查询范围:</label> <select class="form-control-sm"
+							v-model="accountTypeWithdrawDetails">
+							<option value="">全部</option>
+							<option v-for="dictItem in accountTypeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshWithdrawDetailsTable">搜索</button>
+				</form>
+				<table class="common-table withdraw-details-table"></table>
+			</div>
+
+			<div id="profitAndLossTab" v-show="currentTab == 'profitAndLoss'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>时间:</label><input type="date" class="form-control-sm"
+							v-model="startTimeProfitAndLoss"><span>到</span><input
+							type="date" class="form-control-sm"
+							v-model="endTimeProfitAndLoss">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameProfitAndLoss">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>查询范围:</label> <select class="form-control-sm"
+							v-model="accountTypeProfitAndLoss">
+							<option value="">全部</option>
+							<option v-for="dictItem in accountTypeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshProfitAndLossTable">搜索</button>
+				</form>
+				<table class="common-table profit-and-loss-table"></table>
+			</div>
+
+			<div id="accountChangeTab" v-show="currentTab == 'accountChange'">
+				<form class="form-inline common-query-cond-form">
+					<div class="form-group common-query-cond">
+						<label>游戏:</label> <select class="form-control-sm"
+							v-model="gameCodeAccountChange">
+							<option value="">所有游戏</option>
+							<option v-for="dictItem in gameDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<div class="form-group common-query-cond">
+						<label>时间:</label><input type="date" class="form-control-sm"
+							v-model="startTimeAccountChange"><span>到</span><input
+							type="date" class="form-control-sm"
+							v-model="endTimeAccountChange">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>用户名:</label><input type="text" class="form-control-sm"
+							v-model="userNameAccountChange">
+					</div>
+					<div class="form-group common-query-cond">
+						<label>账变类型:</label> <select class="form-control-sm"
+							v-model="typeCodeAccountChange">
+							<option value="">请选择</option>
+							<option v-for="dictItem in accountChangeTypeDictItems"
+								:value="dictItem.dictItemCode">{{dictItem.dictItemName}}</option>
+						</select>
+					</div>
+					<button type="button" class="btn btn-danger btn-sm"
+						v-on:click="refreshAccountChangeTable">搜索</button>
+				</form>
+				<table class="common-table account-change-table"></table>
+			</div>
+		</div>
+		<div th:replace="component/betting-order-details-modal::html"></div>
+	</div>
+	<script src="/js/agent-center.js"></script>
+</body>
+</html>

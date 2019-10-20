@@ -1,0 +1,126 @@
+@charset "UTF-8";
+
+.ssc-lottery-history-header {
+	padding-bottom: 15px;
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 15px;
+	margin-top: 15px;
+	margin-right: 0px;
+	margin-left: 0px;
+}
+
+.ssc-statistical-double-sided, .ssc-statistical-loong,
+	.ssc-statistical-num {
+	border-bottom: 1px dotted #ddd;
+	padding-bottom: 15px;
+	margin-bottom: 15px;
+}
+
+.ssc-statistical-loong .row {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.ssc-statistical-loong .col-sm-2 {
+	padding-bottom: 10px;
+}
+
+.ssc-statistical-loong .col-sm-2 div {
+	border: 1px solid #ddd;
+	text-align: center;
+	padding: 4px;
+}
+
+.ssc-statistical-loong span {
+	padding-right: 8px;
+}
+
+.ssc-statistical-num .row:first-child {
+	padding-bottom: 8px;
+}
+
+.ssc-statistical-num label {
+	padding-right: 26px;
+	float: left;
+	font-weight: bold;
+}
+
+.ssc-statistical-num a {
+	width: 60px;
+	margin-right: 10px;
+	float: left;
+}
+
+.ssc-lottery-history-title {
+	line-height: 2.1;
+	font-weight: bold;
+	color: #6d5f5f;
+}
+
+.ssc-lottery-history-header a {
+	margin-right: 40px;
+}
+
+.ssc-lottery-history-date {
+	text-align: end;
+}
+
+.ssc-statistical-double-sided-table, .ssc-lottery-history-table {
+	border-bottom: 0 !important;
+}
+
+.ssc-statistical-double-sided-table  thead th,
+	.ssc-lottery-history-table thead th {
+	border-bottom: 0;
+	text-align: center;
+	color: #666;
+	font-size: 14px;
+	font-weight: normal;
+	background-color: #ececec;
+}
+
+.ssc-statistical-double-sided-table  tr td, .ssc-lottery-history-table tr td
+	{
+	text-align: center;
+	color: #666;
+	border-left: 0;
+}
+
+.ssc-game-lottery-result {
+	
+}
+
+.ssc-game-lottery-result span {
+	width: 32px;
+	height: 32px;
+	line-height: 32px;
+	font-weight: bold;
+	display: inline-block;
+	background-color: #cb3a3a;
+	color: #fff;
+	border-radius: 27px;
+	text-align: center;
+	margin: 0 2px;
+	font-size: 20px;
+}
+
+.ssc-unselected-number {
+	background-color: #e9f3fb !important;
+	color: #fff !important;
+}
+
+.ssc-highlight-red {
+	color: #f12d35 !important;
+}
+
+.ssc-highlight-blue {
+	color: #184dd5 !important;
+}
+
+.ssc-highlight-small, .ssc-highlight-single {
+	background-color: #9da9c3 !important;
+}
+
+.ssc-highlight-big, .ssc-highlight-double {
+	background-color: #fb8e19 !important;
+}

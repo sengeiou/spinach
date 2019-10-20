@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<title>开奖历史</title>
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+<script src="https://cdn.staticfile.org/dayjs/1.7.8/dayjs.min.js"></script>
+<link href="/css/common/common.css" rel="stylesheet" type="text/css">
+<script src="/js/common/common.js"></script>
+<style type="text/css">
+</style>
+</head>
+
+<body style="height: 100%;">
+	<div class="container">
+		<div th:replace="common/header::html"></div>
+		<div th:replace="lottery-history-ssc::html"></div>
+	</div>
+</body>
+</html>

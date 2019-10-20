@@ -1,0 +1,235 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<style>
+.betting-order-details-dialog {
+	max-width: 100%;
+	width: 50%;
+}
+
+.betting-order-details-dialog .modal-body {
+	height: 450px;
+	overflow: auto;
+}
+
+.betting-order-details-dialog .modal-title span {
+	padding-left: 10px;
+	color: #E37D23;
+}
+
+.betting-summary-title {
+	margin-bottom: 20px;
+	padding-left: 10px;
+	border-left: 3px solid #3080fe;
+}
+
+.betting-order-details-item label {
+	color: #9a9898;
+	padding-right: 4px;
+}
+
+.betting-order-details-highlight {
+	color: #E37D23 !important;
+}
+
+.betting-order-details-table thead th {
+	border-top: 0;
+	border-bottom: 0;
+	text-align: center;
+	color: #666;
+	font-size: 14px;
+	font-weight: normal;
+	background-color: #dedede;
+}
+
+.betting-order-details-table tbody tr {
+	background-color: #EEEEEE;
+}
+
+.betting-order-details-table tr td {
+	text-align: center;
+	border-top: 0;
+	color: #666;
+	border-bottom: 0;
+	border-left: 0;
+}
+
+.change-order-tip {
+	text-align: center;
+	color: red;
+	font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+	<div id="change-order-modal" v-cloak>
+		<div v-if="showChangeOrderFlag">
+			<div class="modal-mask">
+				<div class="modal-wrapper">
+					<div class="modal-dialog betting-order-details-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">
+									改单<span>订单号:{{bettingOrderDetails.orderNo}}</span>
+								</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="showChangeOrderFlag = false">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="betting-summary-title">订单摘要</div>
+								<div class="row">
+									<div class="col-sm-6 betting-order-details-item">
+										<label>投注用户:</label> <span>{{bettingOrderDetails.userName}}</span>
+									</div>
+									<div class="col-sm-6 betting-order-details-item">
+										<label>奖期:</label> <span>{{bettingOrderDetails.gameName}} 第{{bettingOrderDetails.issueNum}}期</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6 betting-order-details-item">
+										<label>投注模式:</label> <span>{{bettingOrderDetails.baseAmount}}元</span>
+									</div>
+									<div class="col-sm-6 betting-order-details-item">
+										<label>投注倍数:</label> <span>{{bettingOrderDetails.multiple}}</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6 betting-order-details-item">
+										<label>单倍注数:</label> <span>{{bettingOrderDetails.totalBettingCount}}</span>
+									</div>
+									<div class="col-sm-6 betting-order-details-item">
+										<label>总金额:</label> <span>{{bettingOrderDetails.totalBettingAmount}}元</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6 betting-order-details-item">
+										<label>投注时间:</label> <span>{{bettingOrderDetails.bettingTime}}</span>
+									</div>
+									<div class="col-sm-6 betting-order-details-item">
+										<label>中奖金额:</label> <span class="betting-order-details-highlight">{{bettingOrderDetails.totalWinningAmount}}元</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6 betting-order-details-item">
+										<label>订单状态:</label> <span>{{bettingOrderDetails.stateName}}</span>
+									</div>
+									<div class="col-sm-6 betting-order-details-item">
+										<label>开奖号码:</label> <span class="betting-order-details-highlight">{{bettingOrderDetails.lotteryNum}}</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6 offset-md-6 betting-order-details-item">
+										<label>订单盈亏:</label> <span class="betting-order-details-highlight">{{bettingOrderDetails.totalProfitAndLoss}}元</span>
+									</div>
+								</div>
+								<div class="betting-summary-title" style="">订单明细</div>
+								<table class="table table-sm betting-order-details-table">
+									<thead>
+										<tr>
+											<th>玩法</th>
+											<th>投注内容</th>
+											<th>投注注数</th>
+											<th>投注金额</th>
+											<th>奖金</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr v-for="bettingRecord in bettingOrderDetails.bettingRecords">
+											<td><select class="form-control-sm" v-model="bettingRecord.gamePlayCode">
+													<option v-for="gamePlay in gamePlays" v-bind:value="gamePlay.gamePlayCode">{{gamePlay.gamePlayName}}</option>
+											</select></td>
+											<td><input type="text" class="form-control-sm" v-model="bettingRecord.selectedNo"></td>
+											<td>{{bettingRecord.bettingCount}}</td>
+											<td class="betting-order-details-highlight">{{bettingRecord.bettingAmount}}</td>
+											<td>{{bettingRecord.winningAmount}}</td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="change-order-tip">暂支持修改玩法和投注内容!</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success btn-sm" v-on:click="changeOrder">确定</button>
+								<button type="button" class="btn btn-sm" v-on:click="showChangeOrderFlag = false">返回</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var changeOrderModalVM = new Vue({
+			el : '#change-order-modal',
+			data : {
+				showChangeOrderFlag : false,
+				gamePlays : [],
+				bettingOrderDetails : {}
+			},
+			computed : {},
+			created : function() {
+			},
+			methods : {
+				show : function(id, gameCode) {
+					var that = this;
+					that.$http.get('/game/findGamePlayByGameCode', {
+						params : {
+							gameCode : gameCode
+						}
+					}).then(function(res) {
+						that.gamePlays = res.body.data;
+					});
+					that.$http.get('/betting/findBettingOrderDetails', {
+						params : {
+							id : id
+						}
+					}).then(function(res) {
+						that.bettingOrderDetails = res.body.data;
+						that.showChangeOrderFlag = true;
+					});
+				},
+
+				changeOrder : function() {
+					var that = this;
+					var params = [];
+					var bettingRecords = that.bettingOrderDetails.bettingRecords;
+					for (var i = 0; i < bettingRecords.length; i++) {
+						var bettingRecord = bettingRecords[i];
+						if (bettingRecord.gamePlayCode == null || bettingRecord.gamePlayCode == '') {
+							layer.alert('请选择玩法', {
+								title : '提示',
+								icon : 7,
+								time : 3000
+							});
+							return;
+						}
+						if (bettingRecord.selectedNo == null || bettingRecord.selectedNo == '') {
+							layer.alert('请输入投注内容', {
+								title : '提示',
+								icon : 7,
+								time : 3000
+							});
+							return;
+						}
+						params.push({
+							bettingOrderId : that.bettingOrderDetails.id,
+							bettingRecordId : bettingRecord.id,
+							gamePlayCode : bettingRecord.gamePlayCode,
+							selectedNo : bettingRecord.selectedNo
+						});
+					}
+					that.$http.post('/betting/changeOrder', params).then(function(res) {
+						layer.alert('操作成功!', {
+							icon : 1,
+							time : 3000,
+							shade : false
+						});
+						that.showChangeOrderFlag = false;
+						bettingRecordVM.refreshTable();
+					});
+				}
+			}
+		});
+	</script>
+</body>
+</html>
